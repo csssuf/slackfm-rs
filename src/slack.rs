@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Mutex;
 
+use slack_api::chat;
 use slack_api::requests as slack_request;
 use slack_api::users_profile;
 
@@ -67,5 +68,15 @@ impl SlackClient {
         let fields = user.profile.unwrap().fields.unwrap();
 
         Ok(fields[&target_field_id].clone().value)
+    }
+
+    pub(crate) fn post_message(&self, channel_id: &str, message: &str) -> Result<(), String> {
+        let mut post_request = chat::PostMessageRequest::default();
+        post_request.channel = channel_id;
+        post_request.text = message;
+
+        chat::post_message(&self.client, &self.token, &post_request)
+            .map(|_| ())
+            .map_err(|e| format!("{}", e))
     }
 }
