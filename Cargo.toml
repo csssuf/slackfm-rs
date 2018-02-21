@@ -7,4 +7,5 @@ authors = ["James Forcier <csssuf@csssuf.net>"]
 rocket = "0.3.6"
 rocket_codegen = "0.3.6"
 rocket_contrib = "0.3.6"
+rustfm = { git = "https://github.com/csssuf/rustfm", branch = "clone-tracks" }
 slack_api = "0.19"
