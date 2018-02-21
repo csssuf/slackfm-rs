@@ -29,4 +29,3 @@ fn main() {
         .mount("/", routes![command_np])
         .launch();
 }
-

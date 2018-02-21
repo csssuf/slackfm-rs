@@ -30,24 +30,30 @@ impl SlackClient {
 
         let fields = user.profile.unwrap().fields.unwrap();
 
-        for (field_id, field_values) in fields.iter() {
+        for (field_id, field_values) in &fields {
             if field_values.label == Some(field_name.to_string()) {
                 lock.insert(field_name.to_string(), field_id.to_string());
                 return Ok(field_id.to_string());
             }
         }
 
-        return Err(format!("Your Slack doesn't have the \"{}\" field enabled - talk to an owner.", field_name));
+        Err(format!(
+            "Your Slack doesn't have the \"{}\" field enabled - talk to an owner.",
+            field_name
+        ))
     }
 
     fn lookup_field_id(&self, field_name: &str) -> Option<String> {
         let lock = self.field_ids.lock().unwrap();
 
-        let out = lock.get(field_name).cloned();
-        out
+        lock.get(field_name).cloned()
     }
 
-    pub(crate) fn get_custom_field(&self, field_name: &str, user_id: &str) -> Result<Option<String>, String> {
+    pub(crate) fn get_custom_field(
+        &self,
+        field_name: &str,
+        user_id: &str,
+    ) -> Result<Option<String>, String> {
         let target_field_id = match self.lookup_field_id(field_name) {
             Some(id) => id,
             None => self.get_custom_field_id(field_name, user_id)?,
@@ -60,6 +66,6 @@ impl SlackClient {
         let user = users_profile::get(&self.client, &self.token, &user_request).unwrap();
         let fields = user.profile.unwrap().fields.unwrap();
 
-        Ok(fields.get(&target_field_id).unwrap().clone().value)
+        Ok(fields[&target_field_id].clone().value)
     }
 }

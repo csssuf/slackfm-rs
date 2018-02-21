@@ -18,7 +18,10 @@ struct CommandRequest {
 }
 
 #[post("/np", data = "<payload>")]
-fn command_np(slack_client: State<SlackClient>, payload: LenientForm<CommandRequest>) -> Result<String, String> {
+fn command_np(
+    slack_client: State<SlackClient>,
+    payload: LenientForm<CommandRequest>,
+) -> Result<String, String> {
     let payload = payload.get();
 
     let lastfm_username = slack_client.get_custom_field("LastFM", &payload.user_id)?;
