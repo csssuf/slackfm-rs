@@ -594,19 +594,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "slack-fm"
-version = "0.1.0"
-dependencies = [
- "rocket 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "rocket_codegen 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "rocket_contrib 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde 1.0.27 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_derive 1.0.27 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_json 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "slack_api 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "slack_api"
 version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -615,6 +602,16 @@ dependencies = [
  "serde 1.0.27 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.27 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.9 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "slackfm"
+version = "0.1.0"
+dependencies = [
+ "rocket 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rocket_codegen 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rocket_contrib 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "slack_api 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
