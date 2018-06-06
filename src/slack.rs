@@ -116,3 +116,7 @@ impl SlackClient {
             .map_err(|e| format!("{}", e))
     }
 }
+
+pub(crate) fn escape_text(s: String) -> String {
+    s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+}
