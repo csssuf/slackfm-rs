@@ -41,7 +41,7 @@ fn command_np(
 
     if let Some(lastfm_username) = slack_client.get_lastfm_field(&payload.team_id, &payload.user_id, &token)? {
         let now_playing = lastfm_client.now_playing(&lastfm_username)?;
-        let message = format!("{} is now playing: {} - {}", payload.user_name, now_playing.artist, now_playing.name);
+        let message = format!("<@{}> is now playing: {} - {}", payload.user_id, now_playing.artist, now_playing.name);
         slack_client.post_message(&token, &payload.channel_id, &message)?;
         Ok(())
     } else {
