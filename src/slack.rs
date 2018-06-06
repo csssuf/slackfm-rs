@@ -75,7 +75,11 @@ impl SlackClient {
         let user = users_profile::get(&self.client, &token, &user_request).unwrap();
         let fields = user.profile.unwrap().fields.unwrap();
 
-        Ok(fields[&target_field_id].clone().value)
+        if let Some(contents) = fields.get(&target_field_id) {
+            Ok(contents.clone().value)
+        } else {
+            Ok(None)
+        }
     }
 
     pub(crate) fn post_message(
