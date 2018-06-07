@@ -1,0 +1,12 @@
+FROM rustlang/rust:nightly
+
+WORKDIR /slackfm
+
+COPY ./Cargo.lock ./Cargo.lock
+COPY ./Cargo.toml ./Cargo.toml
+COPY ./src ./src
+COPY ./migrations ./migrations
+
+RUN cargo build --release
+
+CMD ["./target/release/slackfm"]
