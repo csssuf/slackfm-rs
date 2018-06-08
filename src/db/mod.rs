@@ -16,7 +16,7 @@ pub mod schema;
 
 #[cfg(feature = "postgres")]
 type Conn = PgConnection;
-#[cfg(feature = "sqlite")]
+#[cfg(all(feature = "sqlite", not(feature = "postgres")))]
 type Conn = SqliteConnection;
 
 pub(crate) type Pool = r2d2::Pool<ConnectionManager<Conn>>;
