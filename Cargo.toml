@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["James Forcier <csssuf@csssuf.net>"]
 
 [dependencies]
-diesel = { version = "1.0", features = ["sqlite"] }
+diesel = "<=1.2"
 r2d2 = "0.8"
 r2d2-diesel = "1.0"
 rocket = "0.3.6"
@@ -12,3 +12,8 @@ rocket_codegen = "0.3.6"
 rocket_contrib = "0.3.6"
 rustfm = { git = "https://github.com/csssuf/rustfm", branch = "clone-tracks" }
 slack_api = "0.19"
+
+[features]
+default = ["postgres"]
+postgres = ["diesel/postgres"]
+sqlite = ["diesel/sqlite"]
