@@ -13,5 +13,9 @@ RUN cargo build --release
 
 # Copy into a new slimmer image.
 FROM debian:stretch-slim
+RUN apt-get update && \
+    apt-get install -yy \
+        libpq5 \
+        libssl1.1
 COPY --from=build slackfm/target/release/slackfm .
 CMD ["./slackfm"]
