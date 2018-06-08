@@ -12,6 +12,7 @@ extern crate slack_api;
 
 mod command;
 mod db;
+mod health;
 mod lastfm;
 mod oauth;
 mod slack;
@@ -20,6 +21,7 @@ use std::env;
 
 use command::*;
 use db::*;
+use health::*;
 use lastfm::*;
 use oauth::*;
 use slack::*;
@@ -65,6 +67,6 @@ fn main() {
         .manage(slack)
         .manage(lastfm)
         .manage(pool)
-        .mount("/", routes![command_np, oauth_route])
+        .mount("/", routes![command_np, oauth_route, health_check])
         .launch();
 }
