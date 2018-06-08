@@ -1,4 +1,5 @@
 use diesel::{self, RunQueryDsl};
+use failure::Error;
 use rocket::State;
 use rocket::response::Redirect;
 
@@ -16,9 +17,9 @@ struct OauthParams {
 }
 
 #[get("/oauth?<oauth_params>")]
-fn oauth_route(conn: DbConn, slack: State<SlackClient>, oauth_params: OauthParams) -> Result<Redirect, String> {
+fn oauth_route(conn: DbConn, slack: State<SlackClient>, oauth_params: OauthParams) -> Result<Redirect, Error> {
     if oauth_params.error.is_some() {
-        return Err("OAuth error. Did you decline the installation?".to_string());
+        bail!("OAuth error. Did you decline the installation?");
     }
 
     let code = oauth_params.code.unwrap();
@@ -32,8 +33,7 @@ fn oauth_route(conn: DbConn, slack: State<SlackClient>, oauth_params: OauthParam
     };
     diesel::insert_into(oauth_tokens::table)
         .values(&db_oauth_token)
-        .execute(&*conn)
-        .map_err(|e| format!("{}", e))?;
+        .execute(&*conn)?;
 
     Ok(Redirect::to("https://google.com/"))
 }

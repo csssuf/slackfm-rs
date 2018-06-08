@@ -1,4 +1,5 @@
 use diesel::prelude::*;
+use failure::Error;
 use rocket::State;
 use rocket::request::LenientForm;
 
@@ -27,16 +28,15 @@ fn command_np(
     slack_client: State<SlackClient>,
     lastfm_client: State<LastfmClient>,
     payload: LenientForm<CommandRequest>,
-) -> Result<(), String> {
+) -> Result<(), Error> {
     use db::schema::oauth_tokens::dsl::*;
 
     let payload = payload.get();
 
     let token = oauth_tokens.filter(team_id.eq(&payload.team_id))
-        .load::<OauthToken>(&*conn)
-        .map_err(|e| format!("Couldn't get team OAuth token: {}", e))?
+        .load::<OauthToken>(&*conn)?
         .pop()
-        .ok_or(format!("No OAuth token for team {}", &payload.team_id))?
+        .ok_or(format_err!("No OAuth token for team {}", payload.team_id))?
         .oauth_token;
 
     if let Some(lastfm_username) = slack_client.get_lastfm_field(&payload.team_id, &payload.user_id, &token)? {
@@ -47,6 +47,6 @@ fn command_np(
         slack_client.post_message(&token, &payload.channel_id, &message)?;
         Ok(())
     } else {
-        Err(format!("Sorry, you don't have a Last.FM username set in your slack profile."))
+        bail!("Sorry, you don't have a Last.FM username set in your slack profile.");
     }
 }
