@@ -3,6 +3,7 @@
 
 #[macro_use]
 extern crate diesel;
+extern crate failure;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rocket;
@@ -19,6 +20,8 @@ mod slack;
 
 use std::env;
 
+use failure::Error;
+
 use command::*;
 use db::*;
 use health::*;
@@ -26,42 +29,15 @@ use lastfm::*;
 use oauth::*;
 use slack::*;
 
-fn main() {
-    let slack_client_id = match env::var("SLACKFM_SLACK_CLIENT_ID") {
-        Ok(token) => token,
-        Err(e) => {
-            println!("Couldn't get Slack token: {}", e);
-            return;
-        }
-    };
-
-    let slack_client_secret = match env::var("SLACKFM_SLACK_CLIENT_SECRET") {
-        Ok(token) => token,
-        Err(e) => {
-            println!("Couldn't get Slack token: {}", e);
-            return;
-        }
-    };
-
+fn main() -> Result<(), Error> {
+    let slack_client_id = env::var("SLACKFM_SLACK_CLIENT_ID")?;
+    let slack_client_secret = env::var("SLACKFM_SLACK_CLIENT_SECRET")?;
     let slack = SlackClient::new(&slack_client_id, &slack_client_secret);
 
-    let lastfm_token = match env::var("SLACKFM_LASTFM_API_KEY") {
-        Ok(api_key) => api_key,
-        Err(e) => {
-            println!("Couldn't get Last.fm API key: {}", e);
-            return;
-        }
-    };
-
+    let lastfm_token = env::var("SLACKFM_LASTFM_API_KEY")?;
     let lastfm = LastfmClient::new(&lastfm_token);
 
-    let pool = match init_pool() {
-        Ok(pool) => pool,
-        Err(e) => {
-            println!("Couldn't init_pool(): {}", e);
-            return;
-        }
-    };
+    let pool = init_pool()?;
 
     rocket::ignite()
         .manage(slack)
@@ -69,4 +45,6 @@ fn main() {
         .manage(pool)
         .mount("/", routes![command_np, oauth_route, health_check])
         .launch();
+
+    Ok(())
 }
