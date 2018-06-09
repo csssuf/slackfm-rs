@@ -7,6 +7,7 @@ use db::*;
 use db::models::*;
 use lastfm::*;
 use slack::*;
+use spotify::*;
 
 #[derive(FromForm)]
 struct CommandRequest {
@@ -27,11 +28,12 @@ fn route_np(
     conn: DbConn,
     slack_client: State<SlackClient>,
     lastfm_client: State<LastfmClient>,
+    spotify_client: State<SpotifyClient>,
     payload: LenientForm<CommandRequest>,
 ) -> Result<(), Error> {
     let payload = payload.get();
 
-    match command_np(conn, &slack_client, &lastfm_client, payload) {
+    match command_np(conn, &slack_client, &lastfm_client, &spotify_client, payload) {
         Ok(_) => Ok(()),
         Err(e) => slack_client.respond_error(&payload.response_url, format!("{}", e)),
     }
@@ -41,6 +43,7 @@ fn command_np(
     conn: DbConn,
     slack_client: &SlackClient,
     lastfm_client: &LastfmClient,
+    spotify_client: &SpotifyClient,
     payload: &CommandRequest,
 ) -> Result<(), Error> {
     use db::schema::oauth_tokens::dsl::*;
@@ -60,10 +63,32 @@ fn command_np(
             Ok(np) => np,
             Err(e) => bail!("Last.FM API call failed: {}", e),
         };
-        let artist = escape_text(now_playing.artist.to_string());
-        let track = escape_text(now_playing.name);
-        let message = format!("<@{}> is now playing: {} - {}", payload.user_id, artist, track);
-        slack_client.post_message(&token, &payload.channel_id, &message)?;
+
+        let artist = now_playing.artist.to_string();
+        let track = now_playing.name;
+
+        let mut attachments = Vec::new();
+        if let Some(spotify_track) = spotify_client.get_track_url(&artist, &track)? {
+            attachments.push(Attachment {
+                fallback: format!("Open in Spotify: {}", spotify_track),
+                actions: vec![Action {
+                    ty: ActionType::Button,
+                    text: String::from("Open in Spotify"),
+                    url: spotify_track,
+                    style: Some(ActionStyle::Primary),
+                }],
+            });
+        }
+
+        let message = format!(
+            "<@{}> is now playing: {} - {}",
+            payload.user_id,
+            escape_text(artist.clone()),
+            escape_text(track.clone())
+        );
+
+        slack_client.post_message(&token, &payload.channel_id, &message, attachments)?;
+
         Ok(())
     } else {
         bail!("Sorry, you don't have a Last.FM username set in your slack profile.");

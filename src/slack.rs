@@ -3,6 +3,7 @@ use std::sync::Mutex;
 
 use failure::Error;
 use reqwest::{self, Client};
+use serde_json;
 use slack_api::chat;
 use slack_api::oauth;
 use slack_api::requests::SlackWebRequestSender;
@@ -111,10 +112,17 @@ impl SlackClient {
         token: &str,
         channel_id: &str,
         message: &str,
+        attachments: Vec<Attachment>,
     ) -> Result<(), Error> {
+        let attachments_text = serde_json::to_string(&attachments)?;
+
         let mut post_request = chat::PostMessageRequest::default();
         post_request.channel = channel_id;
         post_request.text = message;
+
+        if attachments.len() > 0 {
+            post_request.attachments = Some(&attachments_text);
+        }
 
         chat::post_message(&self.client, token, &post_request)
             .map(|_| ())
