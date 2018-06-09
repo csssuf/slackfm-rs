@@ -17,10 +17,13 @@ impl LastfmClient {
     pub(crate) fn now_playing(&self, user: &str) -> Result<Track, Error> {
         let mut client = self.client.lock().unwrap();
 
-        let now_playing = client.recent_tracks(user)
-            .with_limit(1)
-            .send()
-            .map_err(|e| format_err!("{:?}", e))?;
+        let now_playing = match client.recent_tracks(user).with_limit(1).send() {
+            Ok(np) => np,
+            Err(_) => client.recent_tracks(user)
+                .with_limit(1)
+                .send()
+                .map_err(|e| format_err!("{}", e))?,
+        };
 
         Ok(now_playing.tracks[0].clone())
     }
