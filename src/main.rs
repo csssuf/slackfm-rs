@@ -29,6 +29,8 @@ mod slack;
 mod spotify;
 
 use std::env;
+use std::sync::mpsc::{SyncSender, sync_channel};
+use std::thread;
 
 use failure::Error;
 
@@ -54,11 +56,23 @@ fn main() -> Result<(), Error> {
 
     let pool = init_pool()?;
 
+    let (tx, rx): (SyncSender<CommandRequest>, _) = sync_channel(5);
+
+    thread::spawn(move || {
+        loop {
+            let payload = rx.recv().unwrap();
+            let conn = pool.get().unwrap();
+            match command_np(db::DbConn(conn), &slack, &lastfm, &spotify, &payload) {
+                Ok(_) => {}
+                Err(e) => {
+                    slack.respond_error(&payload.response_url, format!("{}", e)).unwrap();
+                }
+            }
+        }
+    });
+
     rocket::ignite()
-        .manage(slack)
-        .manage(lastfm)
-        .manage(spotify)
-        .manage(pool)
+        .manage(tx)
         .mount("/", routes![route_np, oauth_route, health_check])
         .launch();
 

@@ -1,3 +1,5 @@
+use std::sync::mpsc::SyncSender;
+
 use diesel::prelude::*;
 use failure::Error;
 use rocket::State;
@@ -10,36 +12,30 @@ use slack::*;
 use spotify::*;
 
 #[derive(FromForm)]
-struct CommandRequest {
-    token: String,
-    team_id: String,
-    channel_id: String,
-    channel_name: String,
-    user_id: String,
-    user_name: String,
-    command: String,
-    text: Option<String>,
-    response_url: String,
-    trigger_id: String,
+pub(crate) struct CommandRequest {
+    pub(crate) token: String,
+    pub(crate) team_id: String,
+    pub(crate) channel_id: String,
+    pub(crate) channel_name: String,
+    pub(crate) user_id: String,
+    pub(crate) user_name: String,
+    pub(crate) command: String,
+    pub(crate) text: Option<String>,
+    pub(crate) response_url: String,
+    pub(crate) trigger_id: String,
 }
 
 #[post("/np", data = "<payload>")]
 fn route_np(
-    conn: DbConn,
-    slack_client: State<SlackClient>,
-    lastfm_client: State<LastfmClient>,
-    spotify_client: State<SpotifyClient>,
+    tx: State<SyncSender<CommandRequest>>,
     payload: LenientForm<CommandRequest>,
 ) -> Result<(), Error> {
-    let payload = payload.get();
+    tx.send(payload.into_inner())?;
 
-    match command_np(conn, &slack_client, &lastfm_client, &spotify_client, payload) {
-        Ok(_) => Ok(()),
-        Err(e) => slack_client.respond_error(&payload.response_url, format!("{}", e)),
-    }
+    Ok(())
 }
 
-fn command_np(
+pub(crate) fn command_np(
     conn: DbConn,
     slack_client: &SlackClient,
     lastfm_client: &LastfmClient,
