@@ -167,3 +167,30 @@ struct CommandResponse {
     ty: ResponseType,
     text: String,
 }
+
+#[derive(Clone, Debug, Serialize)]
+pub struct Attachment {
+    pub fallback: String,
+    pub actions: Vec<Action>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct Action {
+    #[serde(rename = "type")] pub ty: ActionType,
+    pub text: String,
+    pub url: String,
+    pub style: Option<ActionStyle>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ActionType {
+    Button,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ActionStyle {
+    Primary,
+    Danger,
+}
