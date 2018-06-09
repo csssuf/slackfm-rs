@@ -23,15 +23,27 @@ struct CommandRequest {
 }
 
 #[post("/np", data = "<payload>")]
-fn command_np(
+fn route_np(
     conn: DbConn,
     slack_client: State<SlackClient>,
     lastfm_client: State<LastfmClient>,
     payload: LenientForm<CommandRequest>,
 ) -> Result<(), Error> {
-    use db::schema::oauth_tokens::dsl::*;
-
     let payload = payload.get();
+
+    match command_np(conn, &slack_client, &lastfm_client, payload) {
+        Ok(_) => Ok(()),
+        Err(e) => slack_client.respond_error(&payload.response_url, format!("{}", e)),
+    }
+}
+
+fn command_np(
+    conn: DbConn,
+    slack_client: &SlackClient,
+    lastfm_client: &LastfmClient,
+    payload: &CommandRequest,
+) -> Result<(), Error> {
+    use db::schema::oauth_tokens::dsl::*;
 
     let token = oauth_tokens.filter(team_id.eq(&payload.team_id))
         .load::<OauthToken>(&*conn)?
@@ -39,8 +51,15 @@ fn command_np(
         .ok_or(format_err!("No OAuth token for team {}", payload.team_id))?
         .oauth_token;
 
-    if let Some(lastfm_username) = slack_client.get_lastfm_field(&payload.team_id, &payload.user_id, &token)? {
-        let now_playing = lastfm_client.now_playing(&lastfm_username)?;
+    if let Some(lastfm_username) = slack_client.get_lastfm_field(
+        &payload.team_id,
+        &payload.user_id,
+        &token
+    )? {
+        let now_playing = match lastfm_client.now_playing(&lastfm_username) {
+            Ok(np) => np,
+            Err(e) => bail!("Last.FM API call failed: {}", e),
+        };
         let artist = escape_text(now_playing.artist.to_string());
         let track = escape_text(now_playing.name);
         let message = format!("<@{}> is now playing: {} - {}", payload.user_id, artist, track);

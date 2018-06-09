@@ -48,7 +48,7 @@ fn main() -> Result<(), Error> {
         .manage(slack)
         .manage(lastfm)
         .manage(pool)
-        .mount("/", routes![command_np, oauth_route, health_check])
+        .mount("/", routes![route_np, oauth_route, health_check])
         .launch();
 
     Ok(())
