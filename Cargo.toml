@@ -8,11 +8,15 @@ diesel = "<=1.2"
 failure = "0.1"
 r2d2 = "0.8"
 r2d2-diesel = "1.0"
+reqwest = "0.8"
 rocket = "0.3.6"
 rocket_codegen = "0.3.6"
 rocket_contrib = "0.3.6"
 rustfm = { git = "https://github.com/csssuf/rustfm", branch = "clone-tracks" }
-slack_api = "0.19"
+
+[dependencies.slack_api]
+version = "0.19"
+default-features = false
 
 [features]
 default = ["postgres"]

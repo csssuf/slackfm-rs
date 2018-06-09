@@ -2,14 +2,37 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 use failure::Error;
+use reqwest::{self, Client};
 use slack_api::chat;
 use slack_api::oauth;
-use slack_api::requests as slack_request;
+use slack_api::requests::SlackWebRequestSender;
 use slack_api::team;
 use slack_api::users_profile;
 
+struct ReqwestWrapper {
+    client: Client,
+}
+
+impl ReqwestWrapper {
+    fn new() -> ReqwestWrapper {
+        ReqwestWrapper {
+            client: Client::new(),
+        }
+    }
+}
+
+impl SlackWebRequestSender for ReqwestWrapper {
+    type Error = reqwest::Error;
+
+    fn send(&self, method_url: &str, params: &[(&str, &str)]) -> Result<String, Self::Error> {
+        let mut url = reqwest::Url::parse(method_url).unwrap();
+        url.query_pairs_mut().extend_pairs(params);
+        self.client.get(url).send()?.text()
+    }
+}
+
 pub(crate) struct SlackClient {
-    client: slack_request::Client,
+    client: ReqwestWrapper,
     field_ids: Mutex<HashMap<String, String>>,
     client_id: String,
     client_secret: String,
@@ -18,7 +41,7 @@ pub(crate) struct SlackClient {
 impl SlackClient {
     pub(crate) fn new(client_id: &str, client_secret: &str) -> Result<SlackClient, Error> {
         Ok(SlackClient {
-            client: slack_request::default_client()?,
+            client: ReqwestWrapper::new(),
             field_ids: Mutex::new(HashMap::new()),
             client_id: String::from(client_id),
             client_secret: String::from(client_secret),
