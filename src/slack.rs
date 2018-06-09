@@ -139,8 +139,31 @@ impl SlackClient {
             .map(|response| String::from(response.team.unwrap().id.unwrap()))
             .map_err(|e| e.into())
     }
+
+    pub(crate) fn respond_error(&self, response_url: &str, message: String) -> Result<(), Error> {
+        let response = CommandResponse {
+            ty: ResponseType::Ephemeral,
+            text: message,
+        };
+
+        self.client.client.post(response_url).json(&response).send()?;
+
+        Ok(())
+    }
 }
 
 pub(crate) fn escape_text(s: String) -> String {
     s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Serialize)]
+enum ResponseType {
+    Ephemeral,
+    InChannel,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct CommandResponse {
+    ty: ResponseType,
+    text: String,
 }
