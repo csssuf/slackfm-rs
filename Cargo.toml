@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["James Forcier <csssuf@csssuf.net>"]
 
 [dependencies]
-diesel = "<=1.2"
+diesel = "~1.2"
 failure = "0.1"
 percent-encoding = "1.0"
 r2d2 = "0.8"
