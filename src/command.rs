@@ -64,7 +64,7 @@ pub(crate) fn command_np(
         let track = now_playing.name;
 
         let mut attachments = Vec::new();
-        if let Some(spotify_track) = spotify_client.get_track_url(&artist, &track)? {
+        if let Some(spotify_track) = spotify_client.get_track_url(&artist, &track).unwrap_or(None) {
             attachments.push(Attachment {
                 fallback: format!("Open in Spotify: {}", spotify_track),
                 actions: vec![Action {
