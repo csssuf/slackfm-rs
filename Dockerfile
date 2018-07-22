@@ -6,7 +6,7 @@ COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 RUN cargo build --release
 # Delete the placeholder source, add our own, and rebuild.
-RUN rm src/*.rs target/release/slackfm
+RUN rm -f src/*.rs target/release/slackfm target/release/deps/slackfm-*
 COPY ./src ./src
 COPY ./migrations ./migrations
 RUN cargo build --release
