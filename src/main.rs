@@ -46,6 +46,7 @@ fn main() -> Result<(), Error> {
     let slack_client_id = env::var("SLACKFM_SLACK_CLIENT_ID")?;
     let slack_client_secret = env::var("SLACKFM_SLACK_CLIENT_SECRET")?;
     let slack = SlackClient::new(&slack_client_id, &slack_client_secret)?;
+    let rocket_slack = SlackClient::new(&slack_client_id, &slack_client_secret)?;
 
     let lastfm_token = env::var("SLACKFM_LASTFM_API_KEY")?;
     let lastfm = LastfmClient::new(&lastfm_token);
@@ -72,7 +73,7 @@ fn main() -> Result<(), Error> {
     });
 
     rocket::ignite()
-        .manage(slack)
+        .manage(rocket_slack)
         .manage(tx)
         .mount("/", routes![route_np, oauth_route, health_check])
         .launch();
