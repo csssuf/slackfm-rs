@@ -72,6 +72,7 @@ fn main() -> Result<(), Error> {
     });
 
     rocket::ignite()
+        .manage(slack)
         .manage(tx)
         .mount("/", routes![route_np, oauth_route, health_check])
         .launch();
