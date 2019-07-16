@@ -1,6 +1,6 @@
 FROM rustlang/rust:nightly as build
 # Build a new project and just build dependencies in order to cache them.
-RUN USER=root cargo new --bin slackfm
+RUN USER=root cargo new --vcs none --bin slackfm
 WORKDIR /slackfm
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
