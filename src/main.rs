@@ -1,5 +1,4 @@
-#![feature(plugin, custom_derive)]
-#![plugin(rocket_codegen)]
+#![feature(proc_macro_hygiene, decl_macro)]
 
 #[macro_use]
 extern crate diesel;
@@ -10,6 +9,7 @@ extern crate percent_encoding;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate reqwest;
+#[macro_use]
 extern crate rocket;
 extern crate rocket_contrib;
 extern crate rspotify;
@@ -34,11 +34,9 @@ use std::thread;
 
 use failure::Error;
 
-use command::*;
+use command::{command_np, CommandRequest};
 use db::*;
-use health::*;
 use lastfm::*;
-use oauth::*;
 use slack::*;
 use spotify::*;
 
@@ -75,7 +73,7 @@ fn main() -> Result<(), Error> {
     rocket::ignite()
         .manage(rocket_slack)
         .manage(tx)
-        .mount("/", routes![route_np, oauth_route, health_check])
+        .mount("/", routes![command::route_np, oauth::oauth_route, health::health_check])
         .launch();
 
     Ok(())

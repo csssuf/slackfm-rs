@@ -26,7 +26,7 @@ pub(crate) struct CommandRequest {
 }
 
 #[post("/np", data = "<payload>")]
-fn route_np(
+pub(crate) fn route_np(
     tx: State<SyncSender<CommandRequest>>,
     payload: LenientForm<CommandRequest>,
 ) -> Result<(), Error> {
