@@ -60,12 +60,14 @@ fn main() -> Result<(), Error> {
     thread::spawn(move || {
         loop {
             let payload = rx.recv().unwrap();
-            let conn = pool.get().unwrap();
-            match command_np(db::DbConn(conn), &slack, &lastfm, &spotify, &payload) {
-                Ok(_) => {}
-                Err(e) => {
-                    slack.respond_error(&payload.response_url, format!("{}", e)).unwrap();
+            match pool.get() {
+                Ok(conn) =>  match command_np(db::DbConn(conn), &slack, &lastfm, &spotify, &payload) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        slack.respond_error(&payload.response_url, format!("{}", e)).unwrap();
+                    }
                 }
+                Err(e) => slack.respond_error(&payload.response_url, format!("Database error: {}", e)).unwrap(),
             }
         }
     });
