@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 use failure::Error;
-use reqwest::{self, Client};
+use reqwest::blocking::Client;
 use serde_json;
 use slack_api::chat;
 use slack_api::oauth;

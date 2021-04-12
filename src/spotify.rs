@@ -1,6 +1,6 @@
 use failure::Error;
 use percent_encoding::{utf8_percent_encode, QUERY_ENCODE_SET};
-use rspotify::spotify::{client::Spotify, oauth2::SpotifyClientCredentials};
+use rspotify::blocking::{client::Spotify, oauth2::SpotifyClientCredentials};
 
 define_encode_set! {
     pub SPOTIFY_Q_ENCODE_SET = [QUERY_ENCODE_SET] | {'&'}
