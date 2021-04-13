@@ -41,6 +41,8 @@ use slack::*;
 use spotify::*;
 
 fn main() -> Result<(), Error> {
+    env_logger::init();
+
     let slack_client_id = env::var("SLACKFM_SLACK_CLIENT_ID")?;
     let slack_client_secret = env::var("SLACKFM_SLACK_CLIENT_SECRET")?;
     let slack = SlackClient::new(&slack_client_id, &slack_client_secret)?;

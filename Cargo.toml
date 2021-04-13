@@ -5,6 +5,7 @@ authors = ["James Forcier <csssuf@csssuf.net>"]
 
 [dependencies]
 diesel = "~1.2"
+env_logger = "0.8"
 failure = "0.1"
 percent-encoding = "1.0"
 r2d2 = "0.8"
@@ -22,7 +23,9 @@ version = "0.10"
 features = ["blocking"]
 
 [dependencies.rspotify]
-version = "0.9"
+# version = "0.9"
+git = "https://github.com/csssuf/rspotify"
+branch = "v0.9-client-creds"
 features = ["blocking"]
 
 [dependencies.slack_api]
